@@ -11,12 +11,15 @@ $(function() {
 		var $firstNameTd = $('<td>').html(student.first_name);
 		var $lastNameTd = $('<td>').html(student.last_name);
 		var $studentShowAnchor = $('<a>').html('Show').addClass('btn btn-default')
-																 .attr('href', '#').data('id', student.id);
+																 .attr('href', '#');
 		var $studentEditAnchor = $('<a>').html('Edit').addClass('btn btn-primary')
-																 .attr('href', '#').data('id', student.id);
+																 .attr('href', '#');
 		var $studentDeleteAnchor = $('<a>').html('Delete').addClass('btn btn-danger')
-																 .attr('href', '#').data('id', student.id);
-		var $actionsTd = $('<td>').append($studentShowAnchor, $studentEditAnchor, $studentDeleteAnchor);
+																 .attr('href', '#');
+		var $actionsTd = $('<td>').data('id', student.id)
+															.append($studentShowAnchor,
+																			$studentEditAnchor,
+																			$studentDeleteAnchor);
 		return $('<tr>').append($firstNameTd, $lastNameTd, $actionsTd);
 	}
 
@@ -54,7 +57,7 @@ $(function() {
 
 	$('body').on('click', 'a', function(event) {
 		if ($(this).html() == 'Show') {
-			var studentId = $(this).data('id');
+			var studentId = $(this).parent().data('id');
 			$studentListingContainer.fadeOut(500, function() {
 				$studentDataContainer.fadeIn(500);
 			});
