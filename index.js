@@ -4,6 +4,7 @@ var MIN_AGE = 1;
 var MAX_AGE = 99;
 var iterator = 0;
 var studentSequence = JSON.parse(localStorage.getItem('studentSequence'));
+if (!studentSequence) studentSequence = [];
 
 $(function() {
 	var $studentListingContainer = $('.student-listing-container').parent();
@@ -11,22 +12,6 @@ $(function() {
 	var $studentFormContainer = $('.student-form-container').parent();
 	var $studentForm = $('form');
 	var $studentTableBody = $('tbody');
-
-	function studentRowView(student) {
-		var $firstNameTd = $('<td>').html(student.first_name);
-		var $lastNameTd = $('<td>').html(student.last_name);
-		var $studentShowAnchor = $('<a>').html('Show').addClass('btn btn-default')
-																 .attr('href', '#');
-		var $studentEditAnchor = $('<a>').html('Edit').addClass('btn btn-primary')
-																 .attr('href', '#');
-		var $studentDeleteAnchor = $('<a>').html('Delete').addClass('btn btn-danger')
-																 .attr('href', '#');
-		var $actionsTd = $('<td>').data('id', student.id)
-															.append($studentShowAnchor,
-																			$studentEditAnchor,
-																			$studentDeleteAnchor);
-		return $('<tr>').append($firstNameTd, $lastNameTd, $actionsTd);
-	}
 
 	function fillStudentData(student) {
 		$('span.student-full-name').html(student.first_name + ' ' + student.last_name);
@@ -82,12 +67,22 @@ $(function() {
 			contentType: "application/json",
 			dataType: 'json',
 			success: function(students) {
-				// $.each(studentSequence, function(index, id) {
-					$.each(students.data, function(index, student) {
-						$studentTableBody.append(studentRowView(student));
-						// if (student.id === id) $studentTableBody.append(studentRowView(student));
-					});
-				// });
+				var student;
+				var studentIds;
+				var newStudentIds;
+				var newStudents;
+
+				$.each(studentSequence, function(index, id) {
+					student = _.find(students.data, {id: id})
+					$studentTableBody.append(Mustache.render(STUDENT_ROW_VIEW, student));
+				});
+				studentIds = _.map(students.data, 'id');
+				newStudentIds = _.difference(studentIds, studentSequence);
+
+				_(newStudentIds).forEach(function(id) {
+					student = _.find(students.data,{id: id});
+					$studentTableBody.append(Mustache.render(STUDENT_ROW_VIEW, student));
+				});
 			}
 		});
 	}
