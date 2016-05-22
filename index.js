@@ -1,8 +1,9 @@
 // Yout js code goes here
 'use strict';
-var MIN_AGE = 16;
-var MAX_AGE = 70;
+var MIN_AGE = 1;
+var MAX_AGE = 99;
 var iterator = 0;
+var studentSequence = JSON.parse(localStorage.getItem('studentSequence'));
 
 $(function() {
 	var $studentListingContainer = $('.student-listing-container').parent();
@@ -42,6 +43,17 @@ $(function() {
 		});
 	}
 
+	function fillStudentForm(student) {
+		$('.form-control.first-name').val(student.first_name);
+		$('.form-control.last-name').val(student.last_name);
+		$('.form-control.student-age').val(student.age);
+		$('input.student-at-university').attr('checked', student.at_university);
+		$('.student-course').parent().remove();
+		$.each(student.courses, function(index, course) {
+			addCourseInput(course);
+		})
+	}
+
 	function resetStudentData() {
 		$('.student-data-group span').empty();
 		$('.course-group').parent().remove();
@@ -53,6 +65,7 @@ $(function() {
 		$('.form-control.student-age').val('Select age');
 		$('input.student-at-university').attr('checked', false);
 		$('.student-course').parent().remove();
+		$('.alert-danger').hide();
 		addCourseInput();
 		addCourseInput();
 	}
@@ -66,8 +79,10 @@ $(function() {
 			contentType: "application/json",
 			dataType: 'json',
 			success: function(students) {
-				$.each(students.data, function(index, student) {
-					$studentTableBody.append(studentRowView(student));
+				$.each(studentSequence, function(index, id) {
+					$.each(students.data, function(index, student) {
+						if (student.id === id) $studentTableBody.append(studentRowView(student));
+					});
 				});
 			}
 		});
@@ -79,10 +94,11 @@ $(function() {
 		});
 	}
 
-	function addCourseInput() {
+	function addCourseInput(courseName = undefined) {
 		var $newCourseLabel = $('<label>');
 		var $newCourseInput = $('<input>').attr('name', 'courses[]')
 																	.addClass('form-control student-course');
+		if (courseName) $newCourseInput.val(courseName);
 		var $newCourseRemoveAnchor = $('<a>').attr('href', '#')
 																				 .text('Remove course')
 																		 		 .addClass('remove-course');
@@ -107,6 +123,24 @@ $(function() {
 			dataType: 'json',
 			success: function(student) {
 				fillStudentData(student.data);
+			}
+		})
+
+		event.preventDefault();
+	});
+
+	$(document).on('click', '.student-listing-container .btn-primary', function(event) {
+		var studentId = $(this).parent().data('id');
+		$studentListingContainer.fadeOut(500, function() {
+			$studentFormContainer.fadeIn(500);
+		});
+
+		$.get({
+			url: 'https://spalah-js-students.herokuapp.com/students/' + studentId,
+			contentType: "application/json",
+			dataType: 'json',
+			success: function(student) {
+				fillStudentForm(student.data);
 			}
 		})
 
@@ -189,10 +223,21 @@ $(function() {
 	$studentDataContainer.hide();
 	$studentFormContainer.hide();
 	resetStudentData();
+
 	$('.alert').hide();
 	$('.alert-danger li').remove();
 	for(iterator = MIN_AGE; iterator <= MAX_AGE; iterator++) {
 		var $new_option = $('<option>').text(iterator).val(iterator);
 		$('select.student-age').append($new_option);
 	};
+
+	$studentTableBody.sortable({
+		deactivate: function(event, ui) {
+			var studentSequence = []
+			$.each($('tbody tr td:last-child'), function(index, td) {
+				studentSequence.push($(td).data('id'));
+			});
+			localStorage.setItem('studentSequence', JSON.stringify(studentSequence));
+		}
+	});
 });
