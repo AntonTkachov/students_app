@@ -74,7 +74,7 @@ $(function() {
 
 				$.each(studentSequence, function(index, id) {
 					student = _.find(students.data, {id: id})
-					$studentTableBody.append(Mustache.render(STUDENT_ROW_VIEW, student));
+					if (student) $studentTableBody.append(Mustache.render(STUDENT_ROW_VIEW, student));
 				});
 				studentIds = _.map(students.data, 'id');
 				newStudentIds = _.difference(studentIds, studentSequence);
