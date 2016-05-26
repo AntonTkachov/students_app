@@ -9,17 +9,17 @@ require.config({
 		lodash: 'js/lodash',
 		mustache: 'js/mustache.min'
 	},
-	shim: {
-		lodash: {
-			exports: '_'
-		},
-		jquery: {
-			exports: '$'
-		},
-		mustache: {
-			exports: 'Mustache'
-		}
-	}
+	// shim: {
+	// 	lodash: {
+	// 		exports: '_'
+	// 	},
+	// 	jquery: {
+	// 		exports: '$'
+	// 	},
+	// 	mustache: {
+	// 		exports: 'Mustache'
+	// 	}
+	// }
 })
 
 require(['jquery', 'lodash', 'mustache', 'jqueryUI'], function($, _, Mustache) {
